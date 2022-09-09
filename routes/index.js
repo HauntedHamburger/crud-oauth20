@@ -16,21 +16,20 @@ router.get('/', ensureGuest, (req,res) => {
 // @desc Dashboard
 // @route GET /dashboard
 
-router.get('/dashboard', ensureAuth, (req,res) => {
-    console.log(req.user)
-    res.render('dashboard', {
-        name: req.user.firstName,
-    })
-})
+router.get('/dashboard', ensureAuth, async (req,res) => {
+    try {
+        // ,lean() tells Mongoose to skip instantiating a full document and provide JSON objects (or plain old JS objects)
+        // necessary to hydrate handlebars as it only accepts javascript objects
+        const stories = await Story.find({ user: req.user.id }).lean()
+        res.render('dashboard', {
+            name: req.user.firstName,
+            stories
+        })
 
-// @desc Dashboard
-// @route GET /dashboard
-
-router.get('/dashboard', ensureAuth, (req,res) => {
-    console.log(req.user)
-    res.render('dashboard', {
-        name: req.user.firstName,
-    })
+    } catch (err) {
+        console.err(err)
+        res.render('error/500')
+    }
 })
 
 
